@@ -35,9 +35,14 @@ public:
     template <typename InputIt>
     SheBytes(InputIt first, InputIt last) : std::vector<unsigned char>(first, last) {}
 
+    SheBytes(std::initializer_list<unsigned char> ilist) : std::vector<unsigned char>(ilist) {}
+
     SheBytes(const std::string& hex);
 
     SheBytes operator^(const SheBytes& other) const ;
+
+    // Overloaded << operator
+    friend std::ostream& operator<<(std::ostream& os, const SheBytes& sheBytes) ;
 };
 
 

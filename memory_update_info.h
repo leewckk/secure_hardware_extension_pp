@@ -20,6 +20,8 @@ protected:
 
 public:
 
+    MemoryUpdateInfo(){}
+
     MemoryUpdateInfo(
         const SheBytes& new_key,
         const SheBytes& auth_key,

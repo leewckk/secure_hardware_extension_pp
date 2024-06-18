@@ -57,6 +57,15 @@ SheBytes SheBytes::operator^(const SheBytes& other) const {
 }
 
 
+std::ostream& operator<<(std::ostream& os, const SheBytes& sheBytes) {
+        // os << "[";
+        for (size_t i = 0; i < sheBytes.size(); ++i) {
+            os << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(sheBytes[i]);
+        }
+        // os << "]";
+        return os;
+}
+
 
 ///////////////////////////////////// SheBytes implementation /////////////////////////////////
 
