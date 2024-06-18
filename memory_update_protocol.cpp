@@ -14,8 +14,8 @@
 #include "she_bytes.h"
 #include "crypto_common.h"
 
-const SheBytes MemoryUpdateProtocol::KEY_UPDATE_ENC_C = SheConstants::KEY_UPDATE_ENC_C();
-const SheBytes MemoryUpdateProtocol::KEY_UPDATE_MAC_C = SheConstants::KEY_UPDATE_MAC_C();
+const SheBytes MemoryUpdateProtocol::KEY_UPDATE_ENC_C = SheConstants::KEY_UPDATE_ENC_C;
+const SheBytes MemoryUpdateProtocol::KEY_UPDATE_MAC_C = SheConstants::KEY_UPDATE_MAC_C;
 
 
 /**

@@ -1,4 +1,13 @@
-
+/**
+ * @file crypto_common.h
+ * @author liwenchao (leewckk@126.com)
+ * @brief 
+ * @version 0.1
+ * @date 2024-06-18
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
 
 
 #ifndef CRYPTO_COMMON_H
