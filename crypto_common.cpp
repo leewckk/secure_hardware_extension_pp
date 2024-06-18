@@ -10,6 +10,7 @@
  */
 
 #include "crypto_common.h"
+#include "she_bytes.h"
 #include <crypto++/aes.h>
 #include <crypto++/modes.h>
 #include <crypto++/cmac.h>
@@ -37,6 +38,29 @@ SheBytes CryptoCommon::encrypt_aes_cbc(const SheBytes& key, const SheBytes& data
     return encrypted;
 }
 
+
+/**
+ * @brief 
+ * 
+ * @param key 
+ * @param data 
+ * @param iv 
+ * @return SheBytes 
+ */
+SheBytes CryptoCommon::decrypt_aes_cbc(const SheBytes& key, const SheBytes& data, const SheBytes& iv){
+    CBC_Mode<AES>::Decryption aes;
+
+    aes.SetKeyWithIV(key.data(), key.size(), iv.data());
+    SheBytes plain(data.size());
+
+    aes.ProcessData(plain.data(), data.data(), data.size());
+    return plain;
+}
+
+
+
+
+
 /**
  * @brief 
  * 
@@ -52,6 +76,23 @@ SheBytes CryptoCommon::encrypt_aes_ecb(const SheBytes& key, const SheBytes& data
     aes.ProcessData(encrypted.data(), data.data(), data.size());
 
     return encrypted;
+}
+
+
+/**
+ * @brief 
+ * 
+ * @param key 
+ * @param data 
+ * @return SheBytes 
+ */
+SheBytes CryptoCommon::decrypt_aes_ecb(const SheBytes& key, const SheBytes& data){
+    ECB_Mode<AES>::Decryption aes;
+    aes.SetKey(key.data(), key.size());
+
+    SheBytes plain(data.size());
+    aes.ProcessData(plain.data(), data.data(), data.size());
+    return plain;
 }
 
 /**

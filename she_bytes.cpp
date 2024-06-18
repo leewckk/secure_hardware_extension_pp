@@ -58,15 +58,37 @@ SheBytes SheBytes::operator^(const SheBytes& other) const {
 
 
 std::ostream& operator<<(std::ostream& os, const SheBytes& sheBytes) {
-        // os << "[";
-        for (size_t i = 0; i < sheBytes.size(); ++i) {
-            os << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(sheBytes[i]);
-        }
-        // os << "]";
-        return os;
+    // os << "[";
+    for (size_t i = 0; i < sheBytes.size(); ++i) {
+        os << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(sheBytes[i]);
+    }
+    // os << "]";
+    return os;
 }
 
 
+bool operator==(const SheBytes& lhs, const SheBytes& rhs) {
 
+    if (lhs.size() != rhs.size()) {
+        return false;
+    }
+    for (size_t i = 0; i < lhs.size(); ++i) {
+        if (lhs[i] != rhs[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+SheBytes& SheBytes::operator=(const SheBytes& other) {
+
+    if (this == &other) {
+        return *this; // handle self-assignment
+    }
+    // Call base class assignment operator
+    std::vector<unsigned char>::operator=(other);
+    return *this;
+}
 
 

@@ -39,9 +39,11 @@ public:
     SheBytes(const std::string& hex);
 
     SheBytes operator^(const SheBytes& other) const ;
+    SheBytes& operator=(const SheBytes& other);
 
     // Overloaded << operator
     friend std::ostream& operator<<(std::ostream& os, const SheBytes& sheBytes) ;
+    friend bool operator==(const SheBytes& lhs, const SheBytes& rhs); 
 };
 
 

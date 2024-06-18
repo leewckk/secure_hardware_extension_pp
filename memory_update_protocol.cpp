@@ -13,10 +13,7 @@
 #include "memory_update_protocol.h"
 #include "she_bytes.h"
 #include "crypto_common.h"
-
-const SheBytes MemoryUpdateProtocol::KEY_UPDATE_ENC_C = SheConstants::KEY_UPDATE_ENC_C;
-const SheBytes MemoryUpdateProtocol::KEY_UPDATE_MAC_C = SheConstants::KEY_UPDATE_MAC_C;
-
+#include "she_constants.h"
 
 /**
  * @brief 
@@ -24,7 +21,7 @@ const SheBytes MemoryUpdateProtocol::KEY_UPDATE_MAC_C = SheConstants::KEY_UPDATE
  * @return SheBytes 
  */
 SheBytes MemoryUpdateProtocol::get_k1() {
-    return CryptoCommon::aesmp(update_info_.get_auth_key(), KEY_UPDATE_ENC_C);
+    return CryptoCommon::aesmp(update_info_.get_auth_key(), SheConstants::KEY_UPDATE_ENC_C);
 }
 
 /**
@@ -33,7 +30,7 @@ SheBytes MemoryUpdateProtocol::get_k1() {
  * @return SheBytes 
  */
 SheBytes MemoryUpdateProtocol::get_k2() {
-    return CryptoCommon::aesmp(update_info_.get_auth_key(), KEY_UPDATE_MAC_C);
+    return CryptoCommon::aesmp(update_info_.get_auth_key(), SheConstants::KEY_UPDATE_MAC_C);
 }
 
 /**
@@ -42,7 +39,7 @@ SheBytes MemoryUpdateProtocol::get_k2() {
  * @return SheBytes 
  */
 SheBytes MemoryUpdateProtocol::get_k3() {
-    return CryptoCommon::aesmp(update_info_.get_new_key(), KEY_UPDATE_ENC_C);
+    return CryptoCommon::aesmp(update_info_.get_new_key(), SheConstants::KEY_UPDATE_ENC_C);
 }
 
 /**
@@ -51,7 +48,7 @@ SheBytes MemoryUpdateProtocol::get_k3() {
  * @return SheBytes 
  */
 SheBytes MemoryUpdateProtocol::get_k4() {
-    return CryptoCommon::aesmp(update_info_.get_new_key(), KEY_UPDATE_MAC_C);
+    return CryptoCommon::aesmp(update_info_.get_new_key(), SheConstants::KEY_UPDATE_MAC_C);
 }
 
 
@@ -143,20 +140,23 @@ SheBytes MemoryUpdateProtocol::get_m5() {
  */
 MemoryUpdateInfo MemoryUpdateProtocol::decrypt_using_messages(const MemoryUpdateMessages& update_messages) {
     
-    SheBytes uid(update_messages.get_m1().begin(), update_messages.get_m1().begin() + 15);
-    uint8_t auth_key_id = update_messages.get_m1()[15] & 0x0F;
-    uint8_t new_key_id = (update_messages.get_m1()[15] & 0xF0) >> 4;
+    SheBytes m1 = update_messages.get_m1();
+    SheBytes m2 = update_messages.get_m2();
+    SheBytes auth_key = update_messages.get_auth_key();
 
-    SheBytes k1 = CryptoCommon::aesmp(update_messages.get_auth_key(), KEY_UPDATE_ENC_C);
+    SheBytes uid(m1.begin(), m1.begin() + 15);
+    uint8_t auth_key_id = m1[15] & 0x0F;
+    uint8_t new_key_id = (m1[15] & 0xF0) >> 4;
+
+    SheBytes k1 = CryptoCommon::aesmp(auth_key, SheConstants::KEY_UPDATE_ENC_C);
     SheBytes iv(16, 0);
-    SheBytes m2_plain = CryptoCommon::encrypt_aes_cbc(k1, update_messages.get_m2(), iv);
+    SheBytes m2_plain = CryptoCommon::decrypt_aes_cbc(k1, m2, iv);
 
     uint32_t counter = (m2_plain[0] << 24) | (m2_plain[1] << 16) | (m2_plain[2] << 8) | (m2_plain[3] & 0xF0) >> 4;
     uint8_t fid = ((m2_plain[3] & 0x0F) << 2) | ((m2_plain[4] & 0xC0) >> 6);
 
     SecurityFlags flags(fid);
-
     SheBytes new_key(m2_plain.begin() + 16, m2_plain.begin() + 32);
 
-    return MemoryUpdateInfo(new_key, update_messages.get_auth_key(), new_key_id, auth_key_id, counter, uid, flags);
+    return MemoryUpdateInfo(new_key, auth_key, new_key_id, auth_key_id, counter, uid, flags);
 }

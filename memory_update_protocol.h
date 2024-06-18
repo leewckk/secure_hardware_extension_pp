@@ -43,6 +43,7 @@ public:
     SheBytes get_m4();
     SheBytes get_m5();
    
+   static MemoryUpdateInfo decrypt_using_messages(const MemoryUpdateMessages& update_messages) ;
 
     static const SheBytes KEY_UPDATE_ENC_C;// SheConstants::KEY_UPDATE_ENC_C();
     static const SheBytes KEY_UPDATE_MAC_C;// SheConstants::KEY_UPDATE_MAC_C();
@@ -50,7 +51,6 @@ private:
 
     MemoryUpdateInfo update_info_;
 
-   static MemoryUpdateInfo decrypt_using_messages(const MemoryUpdateMessages& update_messages) ;
 };
 
 #endif 

@@ -2,9 +2,11 @@
 
 #include "autosar_key_slots.h"
 #include "memory_update_info.h"
+#include "memory_update_messages.h"
 #include "memory_update_protocol.h"
 #include "secure_flags.h"
 #include "she_bytes.h"
+#include "she_constants.h"
 #include <crypto++/cryptlib.h>
 
 
@@ -89,8 +91,8 @@ int main(int argc, char** argv) {
     secureConfigList.push_back(SecureConfig(KEY_6, SheBytes(16, 0x66), MASTER_ECU_KEY, SheBytes(16, 0x00)));
 
 
-    std::cout<<"KEY_UPDATE_ENC_C: "<< MemoryUpdateProtocol::KEY_UPDATE_ENC_C<<std::endl;
-    std::cout<<"KEY_UPDATE_MAC_C: "<< MemoryUpdateProtocol::KEY_UPDATE_MAC_C<<std::endl;
+    std::cout<<"KEY_UPDATE_ENC_C: "<< SheConstants::KEY_UPDATE_ENC_C<<std::endl;
+    std::cout<<"KEY_UPDATE_MAC_C: "<< SheConstants::KEY_UPDATE_MAC_C<<std::endl;
 
     for(SecureConfig config: secureConfigList){
         MemoryUpdateInfo info(config.get_new_key(), 
@@ -110,6 +112,11 @@ int main(int argc, char** argv) {
         std::cout<< "M3: " << protocol.get_m3() << std::endl;
         std::cout<< "M4: " << protocol.get_m4() << std::endl;
         std::cout<< "M5: " << protocol.get_m5() << std::endl;
+
+        std::cout<<"\r\n";
+
+        MemoryUpdateInfo memoryUpdateInfo = MemoryUpdateProtocol::decrypt_using_messages(MemoryUpdateMessages(config.get_auth_key(), protocol.get_m1(), protocol.get_m2()));
+        std::cout<<"memory update info: \r\n"<<memoryUpdateInfo<<std::endl;
 
         std::cout<<"\r\n\r\n\r\n";
     }

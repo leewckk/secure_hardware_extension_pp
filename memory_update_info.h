@@ -24,7 +24,6 @@ protected:
     int auth_key_id;
     int counter;
     SheBytes uid;
-    int fid;
     SecurityFlags flags;
 
 public:
@@ -46,7 +45,6 @@ public:
           counter(counter),
           uid(uid),
           flags(flags) {
-        this->fid = flags.get_fid();
     }
 
     MemoryUpdateInfo(const MemoryUpdateInfo& info) :
@@ -56,7 +54,6 @@ public:
         auth_key_id(info.auth_key_id),
         counter(info.counter),
         uid(info.uid),
-        fid(info.fid),
         flags(info.flags) {
 
     }
@@ -72,7 +69,6 @@ public:
         auth_key_id = other.auth_key_id;
         counter = other.counter;
         uid = other.uid;
-        fid = other.fid;
         flags = other.flags;
         return *this;
     }
@@ -84,7 +80,6 @@ public:
 
     inline void set_flags(const SecurityFlags& flags) {
         this->flags = flags;
-        this->fid = flags.get_fid();
     }
 
     inline SheBytes get_new_key() const {
@@ -111,6 +106,8 @@ public:
         return uid;
     }
 
+
+    friend std::ostream& operator<<(std::ostream& os, const MemoryUpdateInfo& info) ;
 };
 
 

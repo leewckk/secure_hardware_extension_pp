@@ -42,6 +42,8 @@ public:
     inline SheBytes get_auth_key() const {
         return this->auth_key;
     }
+
+    friend std::ostream& operator<<(std::ostream& os, const MemoryUpdateMessages& message) ;
 };
 
 

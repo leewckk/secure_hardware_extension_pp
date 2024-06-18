@@ -45,6 +45,8 @@ public:
     inline void set_fid(unsigned char fid) {
         _fid = fid;
     }
+
+    friend std::ostream& operator<<(std::ostream& os, const SecurityFlags& info) ;
 };
 
 
