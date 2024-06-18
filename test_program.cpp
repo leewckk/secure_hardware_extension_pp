@@ -1,34 +1,118 @@
 
 
+#include "autosar_key_slots.h"
+#include "memory_update_info.h"
 #include "memory_update_protocol.h"
+#include "secure_flags.h"
 #include "she_bytes.h"
+#include <crypto++/cryptlib.h>
 
 
 using namespace CryptoPP;
 
-int main() {
 
-    // Example usage
-    SheBytes new_key = {0x0f, 0x0e, 0x0d, 0x0c, 0x0b, 0x0a, 0x09, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01, 0x00};
-    SheBytes auth_key = {0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f};
-    SheBytes uid = {0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2a, 0x2b, 0x2c, 0x2d, 0x2e};
-    SecurityFlags flags(0x3F);
+class SecureConfig {
+public :
 
-    MemoryUpdateInfo update_info(new_key, auth_key, 0x0A, 0x05, 0x12345678, uid, flags);
-    MemoryUpdateProtocol protocol(update_info);
+    SecureConfig(
+        const AutoSarkeySlots new_key_slot, 
+        const SheBytes new_key,
+        const AutoSarkeySlots auth_key_id,
+        const SheBytes auth_key,
+        const SheBytes uid = SheBytes(15, 0x00),
+        const SecurityFlags flags = SecurityFlags(0x00),
+        const int counter = 1
+    ): 
+    new_key_slot_(new_key_slot),
+    new_key_(new_key),
+    auth_key_id_(auth_key_id),
+    auth_key_(auth_key),
+    uid_(uid),
+    flags_(flags),
+    counter_(counter)
+    {}
 
-    SheBytes m1 = protocol.get_m1();
-    SheBytes m2 = protocol.get_m2();
-    SheBytes m3 = protocol.get_m3();
-    SheBytes m4 = protocol.get_m4();
-    SheBytes m5 = protocol.get_m5();
 
-    // Print the results
-    std::cout << "M1: " << m1 << std::endl;
-    std::cout << "M2: " << m2 << std::endl;
-    std::cout << "M3: " << m3 << std::endl;
-    std::cout << "M4: " << m4 << std::endl;
-    std::cout << "M5: " << m5 << std::endl;
+    // Getter functions
+    AutoSarkeySlots get_new_key_slot() const {
+        return new_key_slot_;
+    }
+
+    SheBytes get_new_key() const {
+        return new_key_;
+    }
+
+    AutoSarkeySlots get_auth_key_id() const {
+        return auth_key_id_;
+    }
+
+    SheBytes get_auth_key() const {
+        return auth_key_;
+    }
+
+    SheBytes get_uid() const {
+        return uid_;
+    }
+
+    SecurityFlags get_flags() const {
+        return flags_;
+    }
+
+    int get_counter() const {
+        return counter_;
+    }
+
+protected:
+    AutoSarkeySlots new_key_slot_;
+    SheBytes new_key_;
+    AutoSarkeySlots auth_key_id_;
+    SheBytes auth_key_;
+    SheBytes uid_;
+    SecurityFlags flags_;
+    int counter_;
+
+};
+
+
+int main(int argc, char** argv) {
+
+    std::vector<SecureConfig> secureConfigList;
+
+    secureConfigList.push_back(SecureConfig(MASTER_ECU_KEY, SheBytes(16, 0x00), MASTER_ECU_KEY, SheBytes(16, 0x00)));
+    secureConfigList.push_back(SecureConfig(BOOT_MAC, SheBytes(16, 0xCC), MASTER_ECU_KEY, SheBytes(16, 0x00)));
+    secureConfigList.push_back(SecureConfig(BOOT_MAC_KEY, SheBytes(16, 0xCC), MASTER_ECU_KEY, SheBytes(16, 0x00)));
+    secureConfigList.push_back(SecureConfig(KEY_1, SheBytes(16, 0x11), MASTER_ECU_KEY, SheBytes(16, 0x00)));
+    secureConfigList.push_back(SecureConfig(KEY_2, SheBytes(16, 0x22), MASTER_ECU_KEY, SheBytes(16, 0x00)));
+    secureConfigList.push_back(SecureConfig(KEY_3, SheBytes(16, 0x33), MASTER_ECU_KEY, SheBytes(16, 0x00)));
+    secureConfigList.push_back(SecureConfig(KEY_4, SheBytes(16, 0x44), MASTER_ECU_KEY, SheBytes(16, 0x00)));
+    secureConfigList.push_back(SecureConfig(KEY_5, SheBytes(16, 0x55), MASTER_ECU_KEY, SheBytes(16, 0x00)));
+    secureConfigList.push_back(SecureConfig(KEY_6, SheBytes(16, 0x66), MASTER_ECU_KEY, SheBytes(16, 0x00)));
+
+
+    std::cout<<"KEY_UPDATE_ENC_C: "<< MemoryUpdateProtocol::KEY_UPDATE_ENC_C<<std::endl;
+    std::cout<<"KEY_UPDATE_MAC_C: "<< MemoryUpdateProtocol::KEY_UPDATE_MAC_C<<std::endl;
+
+    for(SecureConfig config: secureConfigList){
+        MemoryUpdateInfo info(config.get_new_key(), 
+                                config.get_auth_key(), 
+                                config.get_new_key_slot(), 
+                                config.get_auth_key_id(), 
+                                config.get_counter(), 
+                                config.get_uid(), 
+                                config.get_flags());
+        
+        MemoryUpdateProtocol protocol(info);
+
+        std::cout<<"key slot: " << config.get_new_key_slot()<< std::endl;
+
+        std::cout<< "M1: " << protocol.get_m1() << std::endl;
+        std::cout<< "M2: " << protocol.get_m2() << std::endl;
+        std::cout<< "M3: " << protocol.get_m3() << std::endl;
+        std::cout<< "M4: " << protocol.get_m4() << std::endl;
+        std::cout<< "M5: " << protocol.get_m5() << std::endl;
+
+        std::cout<<"\r\n\r\n\r\n";
+    }
 
     return 0;
 }

@@ -11,10 +11,10 @@
 
 
 #include "memory_update_protocol.h"
+#include "she_bytes.h"
 
 const SheBytes MemoryUpdateProtocol::KEY_UPDATE_ENC_C = SheConstants::KEY_UPDATE_ENC_C();
 const SheBytes MemoryUpdateProtocol::KEY_UPDATE_MAC_C = SheConstants::KEY_UPDATE_MAC_C();
-
 
 
 /**
@@ -76,6 +76,7 @@ SheBytes MemoryUpdateProtocol::get_m2() {
     uint8_t fid = update_info_.get_flags().get_fid();
 
     SheBytes m2_plain(16);
+    counter = counter << 4;
     m2_plain[0] = (counter >> 24) & 0xFF;
     m2_plain[1] = (counter >> 16) & 0xFF;
     m2_plain[2] = (counter >> 8) & 0xFF;
@@ -112,16 +113,16 @@ SheBytes MemoryUpdateProtocol::get_m3() {
  */
 SheBytes MemoryUpdateProtocol::get_m4() {
     uint32_t counter = update_info_.get_counter();
-    counter |= (1 << 28);
+    counter = counter << 4;
 
     SheBytes m4(16);
     m4[0] = (counter >> 24) & 0xFF;
     m4[1] = (counter >> 16) & 0xFF;
     m4[2] = (counter >> 8) & 0xFF;
-    m4[3] = counter & 0xFF;
+    m4[3] = counter & 0xFF | (0x01 << 3);
 
+    // std::cout<<"m4_plain :" << m4 << std::endl;
     m4 = encrypt_aes_ecb(get_k3(), m4);
-
     SheBytes m1 = get_m1();
     m4.insert(m4.begin(), m1.begin(), m1.end());
 
@@ -139,20 +140,30 @@ SheBytes MemoryUpdateProtocol::get_m5() {
  * @param message 
  * @return SheBytes 
  */
-SheBytes MemoryUpdateProtocol::compress(const SheBytes& key, const SheBytes& message) {
-    ECB_Mode<AES>::Encryption aes;
-    aes.SetKey(key.data(), key.size());
+SheBytes MemoryUpdateProtocol::compress(const SheBytes& auth_key, const SheBytes& message) {
 
-    SheBytes result(key.size());
-    aes.ProcessData(result.data(), message.data(), message.size());
+    std::vector<SheBytes> compressDataList;
 
-    SheBytes compressed(result.size());
-    for (size_t i = 0; i < result.size(); ++i) {
-        compressed[i] = key[i] ^ result[i] ^ message[i];
+    compressDataList.push_back(auth_key);
+    compressDataList.push_back(message);
+
+    SheBytes key(auth_key.size());
+
+    
+    for (SheBytes msg : compressDataList) {
+
+        ECB_Mode<AES>::Encryption aes;
+        aes.SetKey(key.data(), key.size());
+
+        SheBytes result(auth_key.size());
+        aes.ProcessData(result.data(), msg.data(), msg.size());
+        key = key ^ result;
+        key = key ^ msg;
     }
 
-    return compressed;
+    return key;
 }
+
 
 
 /**

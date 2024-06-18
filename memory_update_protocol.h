@@ -51,9 +51,10 @@ public:
     SheBytes get_m4();
     SheBytes get_m5();
    
-private:
+
     static const SheBytes KEY_UPDATE_ENC_C;// SheConstants::KEY_UPDATE_ENC_C();
     static const SheBytes KEY_UPDATE_MAC_C;// SheConstants::KEY_UPDATE_MAC_C();
+private:
 
     MemoryUpdateInfo update_info_;
 
