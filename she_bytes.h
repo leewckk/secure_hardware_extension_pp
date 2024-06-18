@@ -17,7 +17,6 @@
 #include <vector>
 #include <string>
 
-#include "she_descriptor.h"
 
 class SheBytes : public std::vector<unsigned char> {
 public:

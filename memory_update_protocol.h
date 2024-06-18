@@ -17,20 +17,12 @@
 #include <iostream>
 #include <vector>
 #include <stdexcept>
-#include <crypto++/aes.h>
-#include <crypto++/modes.h>
-#include <crypto++/cmac.h>
-#include <crypto++/secblock.h>
-#include <crypto++/osrng.h>
-#include <crypto++/filters.h>
-#include <crypto++/hex.h>
 
 #include "secure_flags.h"
 #include "memory_update_info.h"
 #include "memory_update_messages.h"
 #include "she_constants.h"
 
-using namespace CryptoPP;
 
 class MemoryUpdateProtocol {
 public:
@@ -58,11 +50,7 @@ private:
 
     MemoryUpdateInfo update_info_;
 
-    static SheBytes compress(const SheBytes& key, const SheBytes& message);
-    static SheBytes encrypt_aes_cbc(const SheBytes& key, const SheBytes& data, const SheBytes& iv);
-    static SheBytes encrypt_aes_ecb(const SheBytes& key, const SheBytes& data);
-    static SheBytes cmac_aes(const SheBytes& key, const SheBytes& data);
-    static MemoryUpdateInfo decrypt_using_messages(const MemoryUpdateMessages& update_messages) ;
+   static MemoryUpdateInfo decrypt_using_messages(const MemoryUpdateMessages& update_messages) ;
 };
 
 #endif 

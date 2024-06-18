@@ -67,7 +67,6 @@ std::ostream& operator<<(std::ostream& os, const SheBytes& sheBytes) {
 }
 
 
-///////////////////////////////////// SheBytes implementation /////////////////////////////////
 
 
 
